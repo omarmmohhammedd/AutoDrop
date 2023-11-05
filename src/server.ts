@@ -108,7 +108,7 @@ app.use(ErrorHandler);
     deletionTask.start();
     initializeTask.start();
     updateOrderStatus.start()
-    server.listen(PORT, async() => {
+    server.listen(PORT || 3000, async() => {
       console.log("server is running via port:", PORT);
       console.log("database connection running.");
     });
