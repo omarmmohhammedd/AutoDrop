@@ -84,7 +84,7 @@ app.use(ErrorHandler_1.ErrorHandler);
         temporaryDeletion_1.default.start();
         initialize_1.default.start();
         orders_1.updateOrderStatus.start();
-        server.listen(PORT, async () => {
+        server.listen(PORT || 3000, async () => {
             console.log("server is running via port:", PORT);
             console.log("database connection running.");
         });
