@@ -27,19 +27,20 @@ mongoose_1.default.plugin(mongoPaginate_1.mongoPaginate);
 const password = encodeURIComponent(process.env.DB_PASS);
 const username = encodeURIComponent(process.env.DB_USERNAME);
 const db = encodeURIComponent(process.env.DB_NAME);
-const DB_URL = "mongodb+srv://" +
-    username +
-    ":" +
-    password +
-    "@atlascluster.map4lmj.mongodb.net/" +
-    db +
-    "?" +
-    new URLSearchParams({
-        retryWrites: "true",
-        w: "majority",
-    }).toString();
+// const DB_URL =
+//   "mongodb+srv://" +
+//   username +
+//   ":" +
+//   password +
+//   "@atlascluster.map4lmj.mongodb.net/" +
+//   db +
+//   "?" +
+//   new URLSearchParams({
+//     retryWrites: "true",
+//     w: "majority",
+//   }).toString();
+const DB_URL = process.env.DB_DEV_URL;
 exports.DB_URL = DB_URL;
-// const DB_URL = process.env.DB_DEV_URL as string;
 function connection() {
     return new Promise((resolve, reject) => {
         DB.connect(DB_URL, options, async (err) => {
