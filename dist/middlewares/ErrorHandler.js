@@ -7,7 +7,7 @@ exports.ErrorHandler = void 0;
 const http_errors_1 = __importDefault(require("http-errors"));
 const lodash_1 = require("lodash");
 function ErrorHandler(error, req, res, next) {
-    console.log("error => ", { ...error });
+    console.log(error);
     const err = new http_errors_1.default[error.code || "404"](error.message);
     const globalErrors = (0, lodash_1.pick)(err, [
         "statusCode",
@@ -16,9 +16,9 @@ function ErrorHandler(error, req, res, next) {
     ]);
     const developmentError = globalErrors;
     const productionError = globalErrors;
-    res.status(err.statusCode).json(
-    // developmentError
-    process.env.NODE_ENV === "production" ? productionError : developmentError);
-    // next();
+    res
+        .status(err.statusCode)
+        .send(process.env.NODE_ENV === "production" ? productionError : developmentError);
+    next();
 }
 exports.ErrorHandler = ErrorHandler;

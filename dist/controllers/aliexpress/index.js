@@ -37,7 +37,7 @@ class AliExpressController extends baseApi_1.default {
             };
             const base = await (0, settings_1.default)("ALI_BASE");
             const values = (0, GenerateSignature_1.GenerateValues)(data);
-            const sign = (0, GenerateSignature_1.GenerateSign)(values, secret);
+            const sign = (0, GenerateSignature_1.GenerateSign)(values);
             const params = {
                 ...data,
                 sign,

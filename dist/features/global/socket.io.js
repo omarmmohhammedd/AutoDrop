@@ -1,14 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendNamespaceRoomMessage = exports.RunConnection = void 0;
+exports.RunConnection = void 0;
 const socket_io_1 = require("socket.io");
-const ApiError_1 = __importDefault(require("../../errors/ApiError"));
-const user_model_1 = require("../../models/user.model");
-const jwt_1 = require("../jwt");
 const session_1 = require("./session");
+const user_model_1 = require("../../models/user.model");
 function RunConnection(server) {
     const io = new socket_io_1.Server(server, {
         cors: session_1.corsConfig,
@@ -18,10 +13,20 @@ function RunConnection(server) {
     return (middleware) => {
         namespace.use(wrapper(middleware));
         namespace.use(authorizer);
-        global.ns = namespace;
         namespace.on("connection", async function (socket) {
+            console.log("socket connection\n", socket.id);
             global.socket = socket;
+            global.ns = namespace;
+            const accounts = await user_model_1.User.find().exec();
+            if (accounts && accounts?.length) {
+                // socket.join(ac)
+                for await (const account of accounts) {
+                    socket.join(account.id);
+                    console.log("account => " + account.id + " has been join to it room.");
+                }
+            }
             socket.on("join", function (user) {
+                console.log("user has been joined\n", user);
                 socket.join(user);
             });
         });
@@ -31,22 +36,10 @@ exports.RunConnection = RunConnection;
 const wrapper = (expressMiddleware) => {
     return (socket, next) => expressMiddleware(socket.request, {}, next);
 };
-const authorizer = async (socket, next) => {
-    try {
-        const auth = socket.handshake.auth;
-        const { user, authorization } = auth;
-        const existedUser = await user_model_1.User.findById(user).exec();
-        const decodeToken = await (0, jwt_1.VerifyToken)(authorization).catch(() => next(new ApiError_1.default("Unauthorized", "JWT expired, re-login")));
-        if (!existedUser) {
-            throw new ApiError_1.default("UnprocessableEntity", "Account not found");
-        }
-        if (!decodeToken)
-            throw new ApiError_1.default("Unauthorized", "unauthorized");
-        next();
+const authorizer = (socket, next) => {
+    const request = socket.request;
+    if (!(request?.local && request?.local?.user_id)) {
+        return next(new Error("unauthorized"));
     }
-    catch (error) {
-        next(error);
-    }
+    next();
 };
-const sendNamespaceRoomMessage = (room, data) => global.ns.to(room).emit(data);
-exports.sendNamespaceRoomMessage = sendNamespaceRoomMessage;

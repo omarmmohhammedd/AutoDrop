@@ -5,13 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetProductId = exports.GetDetails = void 0;
+const product_model_1 = require("../../../models/product.model");
 const lodash_1 = require("lodash");
 const path_1 = require("path");
-const slugify_1 = __importDefault(require("slugify"));
 const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
-const option_model_1 = require("../../../models/option.model");
-const product_model_1 = require("../../../models/product.model");
 const request_1 = __importDefault(require("../request"));
+const slugify_1 = __importDefault(require("slugify"));
+const uuid_1 = require("uuid");
+const { ALI_APP_KEY, ALI_SECRET, ALI_BASE, ALI_TOKEN, ALI_REFRESH } = process.env;
 class AEProduct {
     /**
      *
@@ -22,9 +23,9 @@ class AEProduct {
         return new Promise((resolve, reject) => {
             (0, request_1.default)({
                 ship_to_country: "SA",
-                product_id,
+                product_id: product_id,
                 target_currency: "SAR",
-                target_language: "ar",
+                target_language: "AR",
                 method: "aliexpress.ds.product.get",
                 sign_method: "sha256",
             })
@@ -48,34 +49,41 @@ class AEProduct {
                 ]);
                 const values = new Array().concat(...options?.map((e) => e.values));
                 const hasValues = values.length;
-                if (!hasValues)
-                    return reject(new ApiError_1.default("InternalServerError", "Try another product"));
+                // if (!hasValues)
+                //   return reject(
+                //     new ApiError("InternalServerError", "Try another product")
+                //   );
                 const data = {
                     name: subject,
                     description: detail,
+                    price: price,
+                    main_price: price,
+                    quantity: quantities,
+                    sku: (0, uuid_1.v4)(),
                     images: images
                         ?.slice(0, 10)
                         ?.map((img, index) => ({
                         ...img,
                         default: index === 0,
                     })),
-                    options: [],
+                    options: options,
                     metadata_title: subject,
                     metadata_description: subject,
+                    product_type: "product",
                     original_product_id: product_id,
+                    merchant: "",
+                    salla_product_id: "",
+                    vendor_commission: undefined,
+                    vendor_price: undefined,
+                    require_shipping: true,
+                    shipping: undefined,
                 };
-                const productOptions = await Promise.all(options.map((option) => {
-                    return new option_model_1.Option(option);
-                }));
-                const product = new product_model_1.Product({
-                    ...data,
-                    options: productOptions,
-                });
+                const product = new product_model_1.Product(data).toJSON();
+                // resolve({ ...product, result });
                 resolve(product);
             })
                 .catch((error) => {
                 const err = error?.response?.data;
-                console.log(err, error);
                 reject(new ApiError_1.default("InternalServerError", err));
             });
         });
@@ -84,7 +92,7 @@ class AEProduct {
         let quantities = 0, price = 0, options = [], concatValues = [], collectOptions = [], collectValues = [];
         collectValues = SKUs.map((sku) => {
             return sku?.ae_sku_property_dtos?.ae_sku_property_d_t_o?.map((ev) => {
-                const { sku_image, sku_price, sku_stock, sku_code, sku_available_stock, offer_sale_price, } = sku;
+                const { sku_image, sku_price, sku_stock, sku_code, sku_available_stock, offer_sale_price, id } = sku;
                 const quantity = sku_available_stock > 100 ? 100 : sku_available_stock;
                 quantities += parseFloat(quantity || 0);
                 return {
@@ -94,6 +102,7 @@ class AEProduct {
                     sku_stock,
                     sku_code,
                     quantity,
+                    id,
                     offer_sale_price,
                 };
             });
@@ -111,7 +120,7 @@ class AEProduct {
             })), "property_value_definition_name");
             const values = uniqValues?.map((val, idx) => {
                 const isFirst = index == 0 && idx == 0;
-                const { sku_image, property_value_definition_name, quantity, property_value_id, sku_property_id, sku_price, offer_sale_price, } = val;
+                const { sku_image, property_value_definition_name, quantity, property_value_id, sku_property_id, id, sku_price, offer_sale_price, } = val;
                 const valuePrice = parseFloat(sku_price);
                 const offerPrice = parseFloat(offer_sale_price);
                 const valPrice = valuePrice === offerPrice ? valuePrice : offerPrice;
@@ -125,18 +134,20 @@ class AEProduct {
                 return {
                     name: property_value_definition_name,
                     price: valPrice,
+                    original_price: valPrice,
                     quantity: quantity,
                     is_default: isFirst,
                     property_id: property_value_id,
                     sku_id: sku_property_id,
                     display_value: displayValue,
                     sku: [sku_property_id, property_value_id].join(":"),
+                    id
                 };
             });
             return {
                 name: option,
                 display_type: sku_image_1 ? "image" : "text",
-                values: values.length > 10 ? values.slice(0, 11) : values,
+                values,
             };
         })
             .filter((e) => e.name !== "Ships From"));
@@ -165,4 +176,5 @@ class AEProduct {
         return product_id;
     }
 }
+exports.default = AEProduct;
 _a = new AEProduct(), exports.GetDetails = _a.GetDetails, exports.GetProductId = _a.GetProductId;

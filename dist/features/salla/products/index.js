@@ -3,9 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const lodash_1 = require("lodash");
-const uuid_1 = require("uuid");
-const generateRandomNumber_1 = __importDefault(require("../../generateRandomNumber"));
 const request_1 = __importDefault(require("../request"));
 class SallaProductHTTP {
     CreateProductOptions(product_id, data, token) {
@@ -17,14 +14,10 @@ class SallaProductHTTP {
         });
     }
     GetProductVariants(product_id, token) {
-        return new Promise((resolve, reject) => {
-            (0, request_1.default)({
-                url: "products/" + product_id + "/variants",
-                method: "get",
-                token,
-            })
-                .then(({ data }) => resolve(data))
-                .catch((error) => reject(error?.response?.data));
+        return (0, request_1.default)({
+            url: "products/" + product_id + "/variants",
+            method: "get",
+            token,
         });
     }
     UpdateProductVariant(variant_id, data, token) {
@@ -42,59 +35,84 @@ class SallaProductHTTP {
             token,
         });
     }
-    PushProduct(data, token) {
-        return (0, request_1.default)({
-            url: "products",
-            method: "post",
-            token,
-            data,
-        });
-    }
 }
 class SallaProducts extends SallaProductHTTP {
-    async createProduct(product, token) {
-        return new Promise(async (resolve, reject) => {
-            const sku = (0, uuid_1.v4)();
-            const rest = (0, lodash_1.pick)(product, [
-                "name",
-                "metadata_title",
-                "metadata_description",
-                "options",
-                "price",
-                "images",
-                "quantity",
-                "description",
-            ]);
-            await super
-                .PushProduct({
-                sku,
-                ...rest,
-                product_type: "product",
-            }, token)
-                .then(({ data }) => resolve(data))
-                .catch((error) => reject(error?.response?.data));
+    async CreateProduct(data, token) {
+        const { data: product } = await (0, request_1.default)({
+            url: "products",
+            method: "post",
+            data,
+            token,
         });
+        const { id, urls, options } = product.data;
+        console.log(product);
+        const requestOptions = options;
+        const originalOptions = data.options;
+        const mapOptions = originalOptions.map((ev) => {
+            const option = requestOptions.find((e) => e.name === ev.name);
+            if (option) {
+                const values = ev.values.map((val) => {
+                    const value = option.values.find((v) => v.display_value === val.display_value);
+                    if (value) {
+                        return {
+                            ...value,
+                            salla_value_id: value.id,
+                        };
+                    }
+                    return val;
+                });
+                return {
+                    ...option,
+                    values,
+                    salla_option_id: option.id,
+                };
+            }
+            return ev;
+        });
+        const PRODUCT_OPTIONS = await SallaProducts.prototype.GetAndCreateProductOptions(mapOptions, id, token);
+        return { updatedOptions: PRODUCT_OPTIONS, id, urls };
     }
-    async updateVariant(id, variant, token) {
-        return new Promise(async (resolve, reject) => {
-            const sku = (0, uuid_1.v4)();
-            const mpn = (0, generateRandomNumber_1.default)().toString().substring(0, 8);
-            const gtin = (0, generateRandomNumber_1.default)().toString().substring(0, 8);
-            const barcode = [mpn, gtin].join("");
-            variant = {
-                ...variant,
-                mpn,
-                gtin,
-                sku,
-                barcode,
+    async GetAndCreateProductOptions(options, id, token) {
+        const mapOptions = await Promise.all(options.map(async (option) => {
+            const { id: optionID, values } = option;
+            console.log(id);
+            const productValues = await SallaProducts.prototype.UpdateProductVariants(values, id, token);
+            return {
+                ...option,
+                values: productValues,
             };
-            super
-                .UpdateProductVariant(id, variant, token)
-                .then(({ data }) => {
-                resolve(data);
-            })
-                .catch((error) => reject(error?.response?.data));
-        });
+        }));
+        console.log("options => \n");
+        return mapOptions;
+    }
+    async UpdateProductVariants(values, id, token) {
+        const { data } = await super.GetProductVariants(id, token);
+        const variants = data.data;
+        const mapValues = await Promise.all(values.map(async (value) => {
+            const { salla_value_id, price, quantity } = value;
+            const variant = variants.find((ev) => ev?.related_option_values?.includes(salla_value_id));
+            const variantID = variant.id;
+            const skuWithBarcode = ["vl", salla_value_id, variantID].join("-");
+            const randomValue = salla_value_id?.toString()?.slice(0, 8);
+            const body = {
+                sku: skuWithBarcode,
+                barcode: skuWithBarcode,
+                price: price,
+                sale_price: price,
+                regular_price: price,
+                stock_quantity: quantity,
+                mpn: randomValue,
+                gtin: randomValue,
+            };
+            const { data } = await super.UpdateProductVariant(variantID, body, token);
+            return {
+                ...value,
+                salla_variant_id: variantID,
+            };
+        }));
+        console.log("values => \n");
+        // console.table(mapValues);
+        return mapValues;
     }
 }
 exports.default = SallaProducts;

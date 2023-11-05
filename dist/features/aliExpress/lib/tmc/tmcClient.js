@@ -128,7 +128,7 @@ class TmcClient {
                     }
                 }
                 else {
-                    console.log(message);
+                    // console.log(message);
                 }
             }
         });

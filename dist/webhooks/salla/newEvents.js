@@ -37,7 +37,7 @@ class SallaEvents extends SallaEventHelper {
             if (!sallaExtension)
                 return;
             const existed = await store_model_1.Store.findOne({ merchant }).exec();
-            console.log("existed store =>", existed);
+            // console.log("existed store =>", existed);
             if (existed)
                 return;
             const store = new store_model_1.Store({
@@ -45,7 +45,7 @@ class SallaEvents extends SallaEventHelper {
                 extension: sallaExtension?.id,
             });
             store.save((err, result) => {
-                console.log("error while installing store", err);
+                // console.log("error while installing store", err);
                 if (err)
                     return reject(err);
                 resolve(result);
@@ -55,7 +55,7 @@ class SallaEvents extends SallaEventHelper {
     async authorize(body) {
         return new Promise(async (resolve, reject) => {
             const { merchant, data } = (0, lodash_1.pick)(body, ["merchant", "data"]);
-            console.log(data.access_token);
+            // console.log(data.access_token);
             const store = await store_model_1.Store.findOne({ merchant }).exec();
             if (!store)
                 return;
@@ -261,43 +261,45 @@ class SallaEvents extends SallaEventHelper {
                         thumbnail: product.toJSON().productId?.images?.[0].original,
                     };
                 }));
-                const subscription = await (0, subscription_1.CheckSubscription)(userId, "orders_limit");
-                if (!subscription)
-                    return resolve("invalid subscription");
-                if (subscription.orders_limit) {
-                    subscription.orders_limit = subscription.orders_limit
-                        ? subscription.orders_limit - 1
-                        : 0;
+                if (userId) {
+                    const subscription = await (0, subscription_1.CheckSubscription)(userId, "orders_limit");
+                    if (!subscription)
+                        return resolve("invalid subscription");
+                    if (subscription.orders_limit) {
+                        subscription.orders_limit = subscription.orders_limit
+                            ? subscription.orders_limit - 1
+                            : 0;
+                    }
+                    const customer = (0, lodash_1.pick)(data.customer, [
+                        "first_name",
+                        "last_name",
+                        "mobile",
+                        "mobile_code",
+                        "avatar",
+                        "email",
+                    ]);
+                    const order = new order_model_1.Order({
+                        ...data,
+                        customer,
+                        items: mapItems.filter((e) => e),
+                        userId,
+                        status: "created",
+                        meta,
+                        order_id: id,
+                        total,
+                        subTotal,
+                    });
+                    order.status_track = (0, orders_1.UpdateOrderTracking)("created", order);
+                    await subscription.save({
+                        session,
+                    });
+                    await order.save({
+                        session,
+                    });
+                    await session.commitTransaction();
+                    await session.endSession();
+                    resolve("order has inserted");
                 }
-                const customer = (0, lodash_1.pick)(data.customer, [
-                    "first_name",
-                    "last_name",
-                    "mobile",
-                    "mobile_code",
-                    "avatar",
-                    "email",
-                ]);
-                const order = new order_model_1.Order({
-                    ...data,
-                    customer,
-                    items: mapItems.filter((e) => e),
-                    userId,
-                    status: "created",
-                    meta,
-                    order_id: id,
-                    total,
-                    subTotal,
-                });
-                order.status_track = (0, orders_1.UpdateOrderTracking)("created", order);
-                await subscription.save({
-                    session,
-                });
-                await order.save({
-                    session,
-                });
-                await session.commitTransaction();
-                await session.endSession();
-                resolve("order has inserted");
             }
             catch (error) {
                 console.log(error);

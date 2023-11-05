@@ -10,7 +10,6 @@ async function syncBranches(req, res, next) {
             "access_token",
         ]);
         res.send("Queue started to sync your branches");
-        console.log(access_token);
         await queues_1.SABranches.add({
             user_id,
             token: access_token,

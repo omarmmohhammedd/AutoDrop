@@ -5,32 +5,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)();
-const cors_1 = __importDefault(require("cors"));
-const express_1 = __importDefault(require("express"));
-const helmet_1 = __importDefault(require("helmet"));
 const http_1 = require("http");
-const morgan_1 = __importDefault(require("morgan"));
-const path_1 = __importDefault(require("path"));
+const express_1 = __importDefault(require("express"));
 const db_1 = require("./db");
-const ApiError_1 = __importDefault(require("./errors/ApiError"));
+const ErrorHandler_1 = require("./middlewares/ErrorHandler");
+const morgan_1 = __importDefault(require("morgan"));
+const helmet_1 = __importDefault(require("helmet"));
+const salla_1 = __importDefault(require("./webhooks/salla"));
+const crypto_1 = __importDefault(require("crypto"));
+const routes_1 = __importDefault(require("./routes"));
+const cors_1 = __importDefault(require("cors"));
+const path_1 = __importDefault(require("path"));
+const aliexpress_1 = __importDefault(require("./cron/aliexpress"));
 const session_1 = require("./features/global/session");
 const socket_io_1 = require("./features/global/socket.io");
-const ErrorHandler_1 = require("./middlewares/ErrorHandler");
-const routes_1 = __importDefault(require("./routes"));
-const salla_1 = __importDefault(require("./webhooks/salla"));
+const temporaryDeletion_1 = __importDefault(require("./cron/temporaryDeletion"));
+const settings_1 = __importDefault(require("./features/settings"));
+const initialize_1 = __importDefault(require("./cron/aliexpress/initialize"));
+const orders_1 = require("./cron/aliexpress/orders");
 const app = (0, express_1.default)();
 const server = (0, http_1.createServer)(app);
 const PORT = process.env.PORT || 2000;
-app.use((0, cors_1.default)({
-    origin: "*",
-}));
+app.use((0, cors_1.default)(session_1.corsConfig));
 app.use((0, helmet_1.default)());
 app.use((0, morgan_1.default)("tiny"));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(express_1.default.static(path_1.default.join(__dirname, "..", "public")));
-console.log(__dirname);
 app.set("trust proxy", 1);
 (0, session_1.SetupSession)().then((sessionMiddleware) => {
     app.use(sessionMiddleware);
@@ -40,26 +42,32 @@ app.set("trust proxy", 1);
  * LISTEN TO ROUTES
  * @route /api
  */
-app.post("/salla/callbacks", salla_1.default);
-app.get("/salla/callbacks", (req, res, next) => {
-    const query = req.query;
-    const params = req.params;
-    const body = req.body;
-    console.log("salla callbacks get route => ", {
-        query,
-        params,
-        body,
-    });
-    next();
+app.post("/webhooks/subscribe", async (req, res) => {
+    const requestHMAC = req.header("x-salla-signature");
+    const secret = await (0, settings_1.default)("SALLA_WEBHOOK_TOKEN");
+    const computedHMAC = crypto_1.default
+        .createHmac("sha256", secret)
+        .update(JSON.stringify(req.body))
+        .digest("hex");
+    // console.log(requestHMAC, computedHMAC);
+    const signatureMatches = requestHMAC === computedHMAC;
+    if (!signatureMatches) {
+        res.sendStatus(401);
+    }
+    // do stuff
+    res.sendStatus(200);
 });
-app.use(routes_1.default);
+app.post("/salla/callbacks", salla_1.default);
+app.post('/', salla_1.default);
+app.get('/', (req, res) => res.send("App Running"));
+app.use("/", routes_1.default);
 /**
  * LISTEN TO 404 ERROR ROUTE
  */
-app.use("*", function (req, res, next) {
-    // console.log("route is invalid");
-    next(new ApiError_1.default("MethodNotAllowed", "Invalid route"));
-    // res.status(404).send();
+app.use("*", function (req, res) {
+    // res.status(404).json({ message: "Method not allowed :/" });
+    // next(new ApiError("NotFound"));
+    res.status(404).end();
 });
 /**
  * LISTEN TO GLOBAL ERROR HANDLER
@@ -68,16 +76,18 @@ app.use(ErrorHandler_1.ErrorHandler);
 /**
  * RUN SERVER ON @PORT 3000 | 2000
  */
-// RunConnection(server);
-(0, db_1.connection)().then(() => {
-    server.listen(PORT, () => {
-        console.log("-- Server running or port " + PORT + " --");
-        // console.log("-- Cron job started --");
-        // trackingOrdersTask.start();
-        // initializeTask.start();
-        // checkSubscriptions.start();
-        // task.start();
-        // deletionTask.start();
+(() => {
+    console.log("server starting..");
+    console.log("database connection starting..");
+    (0, db_1.connection)().then(async () => {
+        aliexpress_1.default.start();
+        temporaryDeletion_1.default.start();
+        initialize_1.default.start();
+        orders_1.updateOrderStatus.start();
+        server.listen(PORT, async () => {
+            console.log("server is running via port:", PORT);
+            console.log("database connection running.");
+        });
     });
-});
+})();
 exports.default = app;

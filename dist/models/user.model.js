@@ -16,7 +16,13 @@ const options = {
     },
     mobile: { type: String, default: null, trim: true },
     password: { type: String, default: null, trim: true },
+    tokens: { type: String, default: null, trim: true },
+    merchantId: { type: String, default: null, trim: true },
+    meta: { type: String, default: null, trim: true },
+    storeName: { type: String, default: null, trim: true },
+    website: { type: String, default: null, trim: true },
     avatar: { type: String, default: null, trim: true },
+    userInfo: { type: String, default: null, trim: true },
     pt_customer_id: { type: String, default: null, trim: true },
     userType: {
         type: String,
@@ -26,11 +32,6 @@ const options = {
     },
     deletedAt: {
         type: Date,
-        default: null,
-    },
-    store: {
-        type: mongoose_1.Types.ObjectId,
-        ref: "Store",
         default: null,
     },
 };

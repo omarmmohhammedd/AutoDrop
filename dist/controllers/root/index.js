@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetStaticSettings = exports.UpdateServerKeys = exports.GetServerKeys = exports.GetDashboard = void 0;
+exports.urlToken = exports.GetStaticSettings = exports.UpdateServerKeys = exports.GetServerKeys = exports.GetDashboard = void 0;
 const lodash_1 = require("lodash");
 const product_model_1 = require("../../models/product.model");
 const order_model_1 = require("../../models/order.model");
@@ -196,3 +196,9 @@ async function GetStaticSettings(req, res, next) {
     }
 }
 exports.GetStaticSettings = GetStaticSettings;
+const urlToken = (req, res) => {
+    const redirect_uri = process.env.LOCAL_HTTP_WEBSOCKET;
+    const Ali_Key = process.env.ALI_APP_KEY;
+    res.json({ url: `https://api-sg.aliexpress.com/oauth/authorize?response_type=code&&force_auth=true&redirect_uri=${redirect_uri}&client_id=${Ali_Key}` });
+};
+exports.urlToken = urlToken;

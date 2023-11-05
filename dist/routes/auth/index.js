@@ -28,11 +28,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const AuthController = __importStar(require("../../controllers/auth/index"));
-const CheckValidationSchema_1 = require("../../middlewares/CheckValidationSchema");
 const authentication_1 = __importDefault(require("../../middlewares/authentication"));
 const auth_1 = require("../../validations/auth");
+const CheckValidationSchema_1 = require("../../middlewares/CheckValidationSchema");
 const authRouter = (0, express_1.Router)();
-// authRouter.get("/verify-token", AuthController.VerifySentToken);
+authRouter.get("/verify-token", AuthController.VerifySentToken);
 authRouter.get("/verify", AuthController.VerifyOTP);
 authRouter.get("/profile", (0, authentication_1.default)(), AuthController.GetProfile);
 authRouter.post("/login", [...auth_1.CheckLogin, CheckValidationSchema_1.CheckValidationSchema], AuthController.Login);

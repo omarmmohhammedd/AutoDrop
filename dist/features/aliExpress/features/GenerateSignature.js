@@ -7,6 +7,7 @@ exports.GenerateSign = exports.GenerateValues = void 0;
 const crypto_1 = require("crypto");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
+const { ALI_SECRET } = process.env;
 function GenerateValues(params) {
     const keys = (obj) => Object.keys(obj).sort();
     const GenerateParams = (obj) => keys(obj)
@@ -14,18 +15,17 @@ function GenerateValues(params) {
         const item = obj[key];
         if (item instanceof Object) {
             // return key + encodeURIComponent(JSON.stringify(item));
-            return key + JSON.stringify(item);
+            return key + GenerateParams(item);
         }
         return key + item;
     })
         .join("");
     const string = GenerateParams(params);
-    console.log(string);
     return string;
 }
 exports.GenerateValues = GenerateValues;
-function GenerateSign(value, secret) {
-    const digest = (0, crypto_1.createHmac)("sha256", secret).update(value).digest("hex");
+function GenerateSign(value) {
+    const digest = (0, crypto_1.createHmac)("sha256", ALI_SECRET).update(value).digest("hex");
     return digest.toUpperCase();
 }
 exports.GenerateSign = GenerateSign;

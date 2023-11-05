@@ -5,14 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const settings_1 = __importDefault(require("./settings"));
 dotenv_1.default.config();
-const { TAB_KEY, TAB_TOKEN, TAB_BASE } = process.env;
+const { TAB_KEY, TAB_BASE } = process.env;
 class TabPayment {
     currency;
     constructor() {
         this.currency = "SAR";
     }
-    CreateRequest({ method, pathname, body, }) {
+    async CreateRequest({ method, pathname, body, }) {
+        const TAB_TOKEN = await (0, settings_1.default)('TAB_TOKEN');
+        console.log(TAB_TOKEN);
         return (0, axios_1.default)({
             url: TAB_BASE + pathname,
             method: method,
@@ -33,6 +36,7 @@ class TabPayment {
                 ...order,
                 currency: this.currency,
                 items: order.items?.map((e) => ({ ...e, currency: this.currency })),
+                id: order.id
             },
             ...(post && {
                 post: {
@@ -63,7 +67,6 @@ class TabPayment {
             },
             payment_methods: ["MADA", "VISA"],
         };
-        console.log(payload);
         return this.CreateRequest({
             pathname: "invoices",
             method: "post",
@@ -102,6 +105,7 @@ class TabPayment {
             order: {
                 ...order,
                 currency: this.currency,
+                items: [], // No need for items in charge
             },
             ...(post && {
                 post: {
@@ -128,7 +132,6 @@ class TabPayment {
             },
             // payment_method: []
         };
-        console.log(payload);
         return this.CreateRequest({
             pathname: "charges",
             method: "post",

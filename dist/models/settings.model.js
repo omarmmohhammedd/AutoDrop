@@ -15,14 +15,6 @@ const options = {
         type: String,
         default: null,
     },
-    start_date: {
-        type: Date,
-        default: null,
-    },
-    end_date: {
-        type: Date,
-        default: null,
-    },
 };
 const schema = new mongoose_1.Schema(options, { timestamps: true });
 const Setting = (0, mongoose_1.model)("setting", schema, "settings");

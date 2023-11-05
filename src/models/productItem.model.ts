@@ -1,12 +1,12 @@
 import {
-  AggregatePaginateModel,
   Document,
   Schema,
   SchemaDefinitionProperty,
   Types,
   model,
 } from "mongoose";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+import mongoose from 'mongoose'
+import mongooseAggregatePaginate from "mongoose-paginate-v2";
 
 interface ProductItemSchema {
   productId: SchemaDefinitionProperty<Types.ObjectId>;
@@ -32,8 +32,7 @@ schema.index({ "$**": "text" });
 schema.plugin(mongooseAggregatePaginate);
 
 const ProductItem = model<
-  ProductItemSchema,
-  AggregatePaginateModel<ProductItemDocument>
+  ProductItemSchema
 >("ProductItem", schema, "productItems");
 
 export { ProductItem, ProductItemDocument };

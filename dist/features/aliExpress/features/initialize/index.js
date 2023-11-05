@@ -38,13 +38,14 @@ async function updateToken() {
                 method,
             };
             const values = (0, GenerateSignature_1.GenerateValues)(body);
-            const sign = (0, GenerateSignature_1.GenerateSign)(values, secret);
+            const sign = (0, GenerateSignature_1.GenerateSign)(values);
             const { data } = await axios_1.default.get(base, {
                 params: { ...body, sign },
             });
             const key = method + "_response";
             const result = data[key];
             const error = data.error_response;
+            console.log(error);
             if (error)
                 throw new ApiError_1.default("UnprocessableEntity", error.msg || "Something went wrong while updating application tokens");
             const { access_token, refresh_token: _refresh_token, expire_time, refresh_token_valid_time, } = (0, lodash_1.pick)(result, [
@@ -80,6 +81,7 @@ async function updateToken() {
         }
         catch (error) {
             await session.abortTransaction();
+            console.log(error);
             reject(error);
         }
         finally {

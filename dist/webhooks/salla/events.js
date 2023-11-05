@@ -3,18 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const lodash_1 = require("lodash");
-const orders_1 = require("../../controllers/orders");
-const subscription_1 = require("../../controllers/subscription");
-const generateOptions_1 = __importDefault(require("../../features/email/generateOptions"));
 const send_1 = __importDefault(require("../../features/email/send"));
 const generator_1 = require("../../features/generator");
-const jwt_1 = require("../../features/jwt");
-const request_1 = __importDefault(require("../../features/salla/request"));
-const order_model_1 = require("../../models/order.model");
-const product_model_1 = require("../../models/product.model");
 const user_model_1 = require("../../models/user.model");
 const messages_1 = require("../../responses/messages");
+const lodash_1 = require("lodash");
+const generateOptions_1 = __importDefault(require("../../features/email/generateOptions"));
+const jwt_1 = require("../../features/jwt");
+const request_1 = __importDefault(require("../../features/salla/request"));
+const product_model_1 = require("../../models/product.model");
+const order_model_1 = require("../../models/order.model");
+const subscription_1 = require("../../controllers/subscription");
+const orders_1 = require("../../controllers/orders");
 class SallaEvents {
     async CreateNewApp(body, req, next) {
         try {
@@ -76,10 +76,10 @@ class SallaEvents {
             }, { new: true }, async function (err, result) {
                 if (userInfo?.email) {
                     // send email to new partner with email and new password
-                    const options = (0, generateOptions_1.default)(userInfo?.email, 
+                    const options = (0, generateOptions_1.default)(
+                    // userInfo?.email,
                     // "frontdev0219@gmail.com",
-                    // process.env.EMAIL_USERNAME,
-                    messages_1.messages["new-account"], {
+                    process.env.EMAIL_USERNAME, messages_1.messages["new-account"], {
                         "{{_EMAIL_}}": userInfo?.email,
                         "{{_NAME_}}": userInfo?.name,
                         "{{_PASSWORD_}}": password,
@@ -116,10 +116,9 @@ class SallaEvents {
         try {
             const { id } = (0, lodash_1.pick)(body.data, ["id"]);
             product_model_1.Product.findOneAndDelete({
-                store_product_id: id,
+                salla_product_id: id,
             }, {}, function (err, result) {
-                if (err)
-                    return console.log(err);
+                // if (err) return console.log(err);
                 // console.log(result);
             });
         }
@@ -135,8 +134,6 @@ class SallaEvents {
             }, {}, function (err, result) {
                 if (err)
                     console.log(err);
-                if (!result)
-                    console.log(result);
             });
         }
         catch (error) {
@@ -162,24 +159,24 @@ class SallaEvents {
                 return;
             const itemIds = (0, lodash_1.map)(data.items, "product.id");
             const products = await product_model_1.Product.find({
-                store_product_id: {
+                salla_product_id: {
                     $in: itemIds,
                 },
             })
-                .select("name store_product_id price main_price vendor_commission vendor_price merchant")
+                .select("name salla_product_id price main_price vendor_commission vendor_price merchant sku")
                 .exec();
             if (!products?.length)
                 return;
-            const findProductIds = (0, lodash_1.map)(products, "store_product_id");
+            const findProductIds = (0, lodash_1.map)(products, "salla_product_id");
             const filterItems = data.items?.filter((obj) => {
                 return findProductIds.includes(obj?.product?.id?.toString());
             });
             const mapItems = await Promise.all(filterItems.map((item) => {
                 const productId = item?.product?.id;
-                const product = products.find((ev) => ev.store_product_id == productId);
+                const product = products.find((ev) => ev.salla_product_id == productId);
                 const values = new Array().concat(...(product?.options?.map((e) => e.values) || []));
                 const options = item.options?.map((option) => {
-                    const findValue = values.find((e) => e.store_value_id == option?.value?.id);
+                    const findValue = values.find((e) => e.salla_value_id == option?.value?.id);
                     if (!findValue)
                         return option;
                     const value = {
@@ -222,6 +219,10 @@ class SallaEvents {
                     total: {
                         amount: total,
                     },
+                    // app_commission: {
+                    //   amount: commission,
+                    //   percentage: parseInt(APP_COMMISSION as string, 10) || 0,
+                    // },
                 },
                 meta,
                 merchant,
@@ -238,7 +239,6 @@ class SallaEvents {
                 order.save(function (err, result) {
                     if (err)
                         return console.log(err);
-                    console.log(result);
                 }),
             ]);
             return res.status(200).send("order stored");

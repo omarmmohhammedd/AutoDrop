@@ -20,6 +20,7 @@ function CheckValidationSchema(req, res, next) {
                 continue;
             result[item.param] = item.msg;
         }
+        console.log(result);
         throw new ApiError_1.default("UnprocessableEntity", result);
     }
     catch (error) {

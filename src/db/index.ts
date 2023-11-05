@@ -26,20 +26,20 @@ const password = encodeURIComponent(process.env.DB_PASS as string);
 const username = encodeURIComponent(process.env.DB_USERNAME as string);
 const db = encodeURIComponent(process.env.DB_NAME as string);
 
-const DB_URL =
-  "mongodb+srv://" +
-  username +
-  ":" +
-  password +
-  "@atlascluster.map4lmj.mongodb.net/" +
-  db +
-  "?" +
-  new URLSearchParams({
-    retryWrites: "true",
-    w: "majority",
-  }).toString();
+// const DB_URL =
+//   "mongodb+srv://" +
+//   username +
+//   ":" +
+//   password +
+//   "@atlascluster.map4lmj.mongodb.net/" +
+//   db +
+//   "?" +
+//   new URLSearchParams({
+//     retryWrites: "true",
+//     w: "majority",
+//   }).toString();
 
-// const DB_URL = process.env.DB_DEV_URL as string;
+const DB_URL = process.env.DB_DEV_URL as string;
 
 function connection(): Promise<any> {
   return new Promise((resolve, reject) => {

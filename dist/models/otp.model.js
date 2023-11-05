@@ -7,7 +7,7 @@ const options = {
         type: String,
         default: null,
     },
-    userId: {
+    user: {
         type: mongoose_1.Types.ObjectId,
         default: null,
         ref: "User",

@@ -278,9 +278,9 @@ export default class SallaEvents extends SallaEventHelper {
 
         const mapItems = await Promise.all(
           items.map(async (item) => {
-            const product = await ProductItem.findOne({
+            const product : any = await ProductItem.findOne({
               store_product_id: item.product?.id,
-            })
+            }) 
               .populate("productId")
               .select("-options")
               .exec();
@@ -302,8 +302,9 @@ export default class SallaEvents extends SallaEventHelper {
             };
           })
         );
-        const subscription = await CheckSubscription(userId, "orders_limit");
-
+        if(userId){
+          const subscription = await CheckSubscription(userId, "orders_limit");
+          
         if (!subscription) return resolve("invalid subscription");
 
         if (subscription.orders_limit) {
@@ -345,6 +346,8 @@ export default class SallaEvents extends SallaEventHelper {
         await session.endSession();
 
         resolve("order has inserted");
+        }
+
       } catch (error) {
         console.log(error);
         await session.abortTransaction();

@@ -16,6 +16,7 @@ const rootRouter = (0, express_1.Router)();
 rootRouter.get("/dashboard", (0, authentication_1.default)(), root_1.GetDashboard);
 rootRouter.get("/settings", root_1.GetStaticSettings);
 rootRouter.get("/settings/keys", root_1.GetServerKeys);
+rootRouter.get('/settings/token', root_1.urlToken);
 rootRouter.post("/settings/keys/update", root_1.UpdateServerKeys);
 rootRouter.post("/contact", ...[
     (0, express_validator_1.body)("name").exists().withMessage("Name is required"),

@@ -35,10 +35,9 @@ class AliExpressProducts extends baseApi_1.default {
         }
     }
     async GetProductShipping(req, res, next) {
-        const { product_id, product_num, sku_id } = (0, lodash_1.pick)(req.body, [
+        const { product_id, product_num } = (0, lodash_1.pick)(req.body, [
             "product_id",
             "product_num",
-            "sku_id",
         ]);
         const method = "aliexpress.logistics.buyer.freight.calculate";
         const data = {
@@ -59,7 +58,6 @@ class AliExpressProducts extends baseApi_1.default {
             const result = data?.aliexpress_logistics_buyer_freight_calculate_response?.result
                 ?.aeop_freight_calculate_result_for_buyer_d_t_o_list
                 ?.aeop_freight_calculate_result_for_buyer_dto;
-            console.log(error);
             if (error)
                 return next(new ApiError_1.default("UnprocessableEntity", error.msg));
             super.send(res, result);

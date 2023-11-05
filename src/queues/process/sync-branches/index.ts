@@ -1,6 +1,5 @@
 import { AxiosError } from "axios";
 import type { ProcessCallbackFunction } from "bull";
-import { sendNamespaceRoomMessage } from "../../../features/global/socket.io";
 import SallaRequest from "../../../features/salla/request";
 
 let page = 1;
@@ -10,7 +9,7 @@ export const syncBranches: ProcessCallbackFunction<any> = (job) => {
   return new Promise(async (resolve) => {
     const { user_id, token } = job.data;
     await main(token);
-    sendNamespaceRoomMessage(user_id, "Branches maybe synced!!");
+    // sendNamespaceRoomMessage(user_id, "Branches maybe synced!!");
     resolve(true);
   });
 };

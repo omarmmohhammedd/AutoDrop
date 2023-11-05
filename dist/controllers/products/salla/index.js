@@ -33,13 +33,15 @@ const product_model_1 = require("../../../models/product.model");
 const mongoose_1 = __importStar(require("mongoose"));
 const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
 const baseApi_1 = __importDefault(require("../../../features/baseApi"));
-const mongoPaginate_1 = require("../../../features/mongoPaginate");
 const productsAggregation_1 = require("../../../features/productsAggregation");
 const index_1 = __importDefault(require("../../../features/salla/products/index"));
 const option_model_1 = require("../../../models/option.model");
 const optionItem_1 = require("../../../models/optionItem");
 const productItem_model_1 = require("../../../models/productItem.model");
-const { DeleteProduct: DeleteSallaProduct, createProduct, updateVariant, GetProductVariants, } = new index_1.default();
+const { DeleteProduct: DeleteSallaProduct, 
+// createProduct,
+// updateVariant,
+GetProductVariants, } = new index_1.default();
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -311,7 +313,7 @@ class ProductsController extends baseApi_1.default {
                 mainProduct.options = mainProductOptions.map((option) => option.id);
                 await mainProduct.save({ session });
             }
-            const { data: storeProduct } = await createProduct({ ...body, price: total, quantity: qty, options }, token).catch((error) => next(new ApiError_1.default("UnprocessableEntity", error)));
+            const storeProduct = await index_1.default.prototype.CreateProduct({ ...body, price: total, quantity: qty, options }, token).catch((error) => next(new ApiError_1.default("UnprocessableEntity", error)));
             const storeProductOptions = storeProduct?.options || [];
             pickedOptions = pickedOptions.map((option, index) => {
                 const storeOption = storeProductOptions[index];
@@ -325,7 +327,7 @@ class ProductsController extends baseApi_1.default {
                 return option;
             });
             // get store product variants to update them based on related option
-            const { data: variants } = await GetProductVariants(storeProduct?.id, token).catch((error) => next(new ApiError_1.default("UnprocessableEntity", error)));
+            const { data: variants } = await index_1.default.prototype.GetProductVariants(storeProduct?.id, token).catch((error) => next(new ApiError_1.default("UnprocessableEntity", error)));
             pickedOptions = await Promise.all(pickedOptions.map(async (option) => {
                 const values = await Promise.all(option.values.map(async (value) => {
                     let variant;
@@ -333,7 +335,7 @@ class ProductsController extends baseApi_1.default {
                     variant = variants.find((item) => item.related_option_values?.includes(value.store_value_id));
                     if (!variant)
                         return value;
-                    variant = await updateVariant(variant?.id, {
+                    variant = await await index_1.default.prototype.UpdateProductVariant(variant?.id, {
                         stock_quantity: value.quantity,
                         price,
                         cost_price: price,
@@ -408,15 +410,19 @@ class ProductsController extends baseApi_1.default {
                 ...productsAggregation_1.productsAggregation,
             ];
             const aggregate = productItem_model_1.ProductItem.aggregate(pipelines);
-            productItem_model_1.ProductItem.aggregatePaginate(aggregate, {
-                ...mongoPaginate_1.options,
-                page,
-            }, (error, products) => {
-                if (error) {
-                    return next(new ApiError_1.default("UnprocessableEntity", error.message));
-                }
-                super.send(res, { products });
-            });
+            // ProductItem.aggregatePaginate(
+            //   aggregate,
+            //   {
+            //     ...options,
+            //     page,
+            //   },
+            //   (error, products) => {
+            //     if (error) {
+            //       return next(new ApiError("UnprocessableEntity", error.message));
+            //     }
+            //     super.send(res, { products });
+            //   }
+            // );
         }
         catch (error) {
             next(error);

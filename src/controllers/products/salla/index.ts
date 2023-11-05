@@ -17,8 +17,8 @@ import { UserDocument } from "../../../models/user.model";
 
 const {
   DeleteProduct: DeleteSallaProduct,
-  createProduct,
-  updateVariant,
+  // createProduct,
+  // updateVariant,
   GetProductVariants,
 } = new SallaProducts();
 
@@ -342,7 +342,7 @@ class ProductsController extends BaseApi {
         await mainProduct.save({ session });
       }
 
-      const { data: storeProduct } = await createProduct(
+      const storeProduct:any = await SallaProducts.prototype.CreateProduct(
         { ...body, price: total, quantity: qty, options },
         token
       ).catch((error) => next(new ApiError("UnprocessableEntity", error)));
@@ -362,7 +362,7 @@ class ProductsController extends BaseApi {
 
       // get store product variants to update them based on related option
 
-      const { data: variants } = await GetProductVariants(
+      const { data: variants }  :any= await SallaProducts.prototype.GetProductVariants(
         storeProduct?.id,
         token
       ).catch((error) => next(new ApiError("UnprocessableEntity", error)));
@@ -382,7 +382,7 @@ class ProductsController extends BaseApi {
 
               if (!variant) return value;
 
-              variant = await updateVariant(
+              variant = await await SallaProducts.prototype.UpdateProductVariant(
                 variant?.id,
                 {
                   stock_quantity: value.quantity,
@@ -486,19 +486,19 @@ class ProductsController extends BaseApi {
       ];
       const aggregate = ProductItem.aggregate(pipelines);
 
-      ProductItem.aggregatePaginate(
-        aggregate,
-        {
-          ...options,
-          page,
-        },
-        (error, products) => {
-          if (error) {
-            return next(new ApiError("UnprocessableEntity", error.message));
-          }
-          super.send(res, { products });
-        }
-      );
+      // ProductItem.aggregatePaginate(
+      //   aggregate,
+      //   {
+      //     ...options,
+      //     page,
+      //   },
+      //   (error, products) => {
+      //     if (error) {
+      //       return next(new ApiError("UnprocessableEntity", error.message));
+      //     }
+      //     super.send(res, { products });
+      //   }
+      // );
     } catch (error) {
       next(error);
     }
