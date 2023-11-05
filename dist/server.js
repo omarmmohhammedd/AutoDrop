@@ -25,7 +25,7 @@ const initialize_1 = __importDefault(require("./cron/aliexpress/initialize"));
 const orders_1 = require("./cron/aliexpress/orders");
 const app = (0, express_1.default)();
 const server = (0, http_1.createServer)(app);
-const PORT = process.env.PORT || 2000;
+const PORT = process.env.PORT || 3000;
 app.use((0, cors_1.default)(session_1.corsConfig));
 app.use((0, helmet_1.default)());
 app.use((0, morgan_1.default)("tiny"));
