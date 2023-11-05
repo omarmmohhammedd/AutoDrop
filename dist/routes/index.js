@@ -1,0 +1,28 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const salla_1 = require("../controllers/salla");
+const authentication_1 = __importDefault(require("../middlewares/authentication"));
+const aliepress_1 = __importDefault(require("./aliepress"));
+const auth_1 = __importDefault(require("./auth"));
+const extensions_1 = __importDefault(require("./extensions"));
+const orders_1 = __importDefault(require("./orders"));
+const payments_1 = __importDefault(require("./payments"));
+const plans_1 = __importDefault(require("./plans"));
+const salla_2 = __importDefault(require("./products/salla"));
+const transactions_1 = __importDefault(require("./transactions"));
+const router = (0, express_1.Router)();
+router.use("/auth", auth_1.default);
+router.use("/orders", orders_1.default);
+router.use("/plans", plans_1.default);
+router.use("/transactions", transactions_1.default);
+router.use("/extensions", extensions_1.default);
+router.use("/salla/products", salla_2.default);
+router.use("/v1/payments", payments_1.default);
+router.use("/ae", aliepress_1.default);
+router.post("/branches/sync", (0, authentication_1.default)(), salla_1.syncBranches);
+router.use("/", router);
+exports.default = router;

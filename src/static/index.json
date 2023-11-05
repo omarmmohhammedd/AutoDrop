@@ -1,0 +1,34 @@
+{
+  "faqs": [
+    {
+      "question_en": "What are the supported platforms for connectivity?",
+      "question_ar": "ما هي المنصات المدعومة للربط ؟",
+      "answer_en": "offline salla platform.",
+      "answer_ar": "منصة سلة حاليا."
+    },
+    {
+      "question_en": "What are the supported sites for linking with stores?",
+      "question_ar": "ما هي المواقع المدعومة للربط مع المتاجر ؟",
+      "answer_en": "Ali Express website now.",
+      "answer_ar": "موقع علي اكسبريس حاليا."
+    },
+    {
+      "question_en": "Is linking to other platforms available in the future?",
+      "question_ar": "هل يتوفر ربط منصات أخري مستقبلا ؟",
+      "answer_en": "Yes, soon other platforms will be supported.",
+      "answer_ar": "نعم ، قريبا سيتم دعم منصات أخري."
+    }
+  ],
+  "termsOfUses": {
+    "title_en": "Terms of uses",
+    "title_ar": "",
+    "content_en": "",
+    "content_ar": ""
+  },
+  "policyAndPrivacy": {
+    "title_en": "Policy and privacy",
+    "title_ar": "",
+    "content_en": "",
+    "content_ar": ""
+  }
+}

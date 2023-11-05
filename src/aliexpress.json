@@ -1,0 +1,26 @@
+{ 
+    "product_items": [
+        {      
+            "logistics_service_name": "CAINIAO_CONSOLIDATION_SA",
+            "sku_attr": "14:201447598#white-black",
+            "product_count": 1,
+            "product_id": 1005003108705876,
+            "order_memo": "Please don't put any logo on the products , We are using Dropshipping service in our store" 
+        }  
+    ], 
+    "logistics_address": {
+        "country": "SA",
+        "zip": "32415",
+        "address": "Al Dahiya Street",
+        "address2": "Al Dahiya Street",
+        "province": "Eastern Province",
+        "city": "Dammam",
+        "contact_person": "Ahmed Abdallah AlJubran",
+        "mobile_no": "554407945",
+        "locale": "ar_SA", 
+        "full_name": "Ahmed Abdallah AlJubran",
+        "is_foreigner": "false", 
+        "phone_country": "+966"
+    },
+    "out_order_id":"1411125921"
+}
