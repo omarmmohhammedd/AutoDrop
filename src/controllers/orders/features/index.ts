@@ -87,7 +87,6 @@ export function CollectVATPrice(amount: number): number {
 
   // Calculate the total price by adding the VAT amount to the original amount
   const total = parseFloat((amount + VATAmount).toFixed(2));
-
   return total;
 }
 

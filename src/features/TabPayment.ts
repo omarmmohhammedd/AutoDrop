@@ -89,7 +89,6 @@ export default class TabPayment {
     body: any;
   }) {
     const TAB_TOKEN = await findSettingKey('TAB_TOKEN')
-    console.log(TAB_TOKEN)
     return axios({
       url: TAB_BASE + pathname,
       method: method,

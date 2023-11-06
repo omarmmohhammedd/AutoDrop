@@ -78,9 +78,8 @@ export async function GetSelectedOrder(
     const amountWithVat = CollectVATPrice(unpaidAmount);
     res.json({
       order,
-
       unpaid_amount: unpaidAmount,
-      amount_included_vat: amountWithVat,
+      amount_included_vat:order.shippingFee ?amountWithVat + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) /100))) :  amountWithVat,
       vat_value: Number(TAB_ORDERS_TAX || 0),
       shippingFee: order.shippingFee,
     });
@@ -220,7 +219,7 @@ export async function CreatePaymentToSubscribe(
     const generateId = [user.id, order.id].join("-");
       await Order.findByIdAndUpdate(id,{$set:{'notes':notes}})
     const unpaidAmount = await UnpaidPrices([order]);
-    const orderAmountWithVat = CollectVATPrice(unpaidAmount);
+    const orderAmountWithVat =order.shippingFee ? CollectVATPrice(unpaidAmount)  + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) /100))) : CollectVATPrice(unpaidAmount)
     const vatAmount = parseFloat(
       (orderAmountWithVat - unpaidAmount).toFixed(2)
     );
@@ -401,7 +400,7 @@ export const UpdateCustomerAddress = async(req:Request,res:Response,next:NextFun
 
 export const updateShipping = async (req: Request, res: Response, next: NextFunction) => {
   const { id, shipping } = pick(req.body, ['id', 'shipping']);
-  const order = await Order.findById(id);
+  const order : any = await Order.findById(id);
   let totalShippingAmount = 0;
 
   if (!order) return next(new ApiError("NotFound"));
@@ -433,6 +432,11 @@ export const updateShipping = async (req: Request, res: Response, next: NextFunc
 
   // Update the order's shippingFee with the totalShippingAmount
   order.shippingFee = totalShippingAmount;
+  let orderShipVat = totalShippingAmount * (order.vat_value /100)
+  order.amount_included_vat +=orderShipVat
+  console.log(order.vat_value)
+  console.log(orderShipVat)
+  console.log(order.amount_included_vat)
   await order.save();
 
 

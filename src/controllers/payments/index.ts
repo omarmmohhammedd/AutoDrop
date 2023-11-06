@@ -136,14 +136,14 @@ export async function CheckOrderPayment(
     order.status_track = status_track;
     order.notes = description;
 
-    const tokens = user?.tokens;
-    const access_token = CheckTokenExpire(tokens);
+    // const tokens = user?.tokens;
+    // const access_token = CheckTokenExpire(tokens);
 
-    await UpdateSalaOrderStatus("in_progress", order.order_id, access_token).catch(
-      (err) => {
-        console.log(err.response.data);
-      }
-    );
+    // await UpdateSalaOrderStatus("in_progress", order.order_id, access_token).catch(
+    //   (err) => {
+    //     console.log(err.response.data);
+    //   }
+    // );
     // await CreateAliExpressOrder({ ...req.body, id: orderId }); // create new order
     await Promise.all([order.save(), transaction.save()]);
 
