@@ -76,6 +76,7 @@ export async function GetSelectedOrder(
 
     const unpaidAmount = await UnpaidPrices([order]);
     const amountWithVat = CollectVATPrice(unpaidAmount);
+    console.log(amountWithVat + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) /100))))
     res.json({
       order,
       unpaid_amount: unpaidAmount,
@@ -220,13 +221,13 @@ export async function CreatePaymentToSubscribe(
       await Order.findByIdAndUpdate(id,{$set:{'notes':notes}})
     const unpaidAmount = await UnpaidPrices([order]);
     const orderAmountWithVat =order.shippingFee ? CollectVATPrice(unpaidAmount)  + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) /100))) : CollectVATPrice(unpaidAmount)
+    console.log(orderAmountWithVat)
     const vatAmount = parseFloat(
       (orderAmountWithVat - unpaidAmount).toFixed(2)
     );
 
     // total order amount Shipping + VAT
     const orderTotalAmount = orderAmountWithVat + shippingFee;
-   
     const items = orderJSON.items?.map((item: any) => {
       const productID = item?.product?.id;
       const quantity = item?.quantity;
