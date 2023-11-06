@@ -15,10 +15,8 @@ const transaction_model_1 = require("../../models/transaction.model");
 const subscription_model_1 = require("../../models/subscription.model");
 const order_model_1 = require("../../models/order.model");
 const features_1 = require("../orders/features");
-const orders_1 = require("../../features/salla/orders");
-const authentication_1 = require("../../middlewares/authentication");
 const TabPayment_1 = __importDefault(require("../../features/TabPayment"));
-const orders_2 = require("../orders");
+const orders_1 = require("../orders");
 const PlaceOrder_1 = require("../../features/aliExpress/features/PlaceOrder");
 const TPayment = new TabPayment_1.default();
 async function CheckSubscriptionResult(req, res, next) {
@@ -110,15 +108,17 @@ req, res, next) {
             order: order?.id || orderId,
             amount: totalUnpaidAmount,
         });
-        const status_track = (0, orders_2.UpdateOrderTracking)("in_review", order);
+        const status_track = (0, orders_1.UpdateOrderTracking)("in_review", order);
         order.status = "in_review";
         order.status_track = status_track;
         order.notes = description;
-        const tokens = user?.tokens;
-        const access_token = (0, authentication_1.CheckTokenExpire)(tokens);
-        await (0, orders_1.UpdateSalaOrderStatus)("in_progress", order.order_id, access_token).catch((err) => {
-            console.log(err.response.data);
-        });
+        // const tokens = user?.tokens;
+        // const access_token = CheckTokenExpire(tokens);
+        // await UpdateSalaOrderStatus("in_progress", order.order_id, access_token).catch(
+        //   (err) => {
+        //     console.log(err.response.data);
+        //   }
+        // );
         // await CreateAliExpressOrder({ ...req.body, id: orderId }); // create new order
         await Promise.all([order.save(), transaction.save()]);
         // res.render("payment-success.ejs");

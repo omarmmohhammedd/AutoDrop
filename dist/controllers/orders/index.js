@@ -48,10 +48,11 @@ async function GetSelectedOrder(req, res, next) {
             throw new ApiError_1.default("NotFound", "Selected order is invalid");
         const unpaidAmount = await (0, features_1.UnpaidPrices)([order]);
         const amountWithVat = (0, features_1.CollectVATPrice)(unpaidAmount);
+        console.log(amountWithVat + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) / 100))));
         res.json({
             order,
             unpaid_amount: unpaidAmount,
-            amount_included_vat: amountWithVat,
+            amount_included_vat: order.shippingFee ? amountWithVat + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) / 100))) : amountWithVat,
             vat_value: Number(TAB_ORDERS_TAX || 0),
             shippingFee: order.shippingFee,
         });
@@ -150,7 +151,8 @@ async function CreatePaymentToSubscribe(req, res, next) {
         const generateId = [user.id, order.id].join("-");
         await order_model_1.Order.findByIdAndUpdate(id, { $set: { 'notes': notes } });
         const unpaidAmount = await (0, features_1.UnpaidPrices)([order]);
-        const orderAmountWithVat = (0, features_1.CollectVATPrice)(unpaidAmount);
+        const orderAmountWithVat = order.shippingFee ? (0, features_1.CollectVATPrice)(unpaidAmount) + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) / 100))) : (0, features_1.CollectVATPrice)(unpaidAmount);
+        console.log(orderAmountWithVat);
         const vatAmount = parseFloat((orderAmountWithVat - unpaidAmount).toFixed(2));
         // total order amount Shipping + VAT
         const orderTotalAmount = orderAmountWithVat + shippingFee;
@@ -330,6 +332,11 @@ const updateShipping = async (req, res, next) => {
     await Promise.all(promises);
     // Update the order's shippingFee with the totalShippingAmount
     order.shippingFee = totalShippingAmount;
+    let orderShipVat = totalShippingAmount * (order.vat_value / 100);
+    order.amount_included_vat += orderShipVat;
+    console.log(order.vat_value);
+    console.log(orderShipVat);
+    console.log(order.amount_included_vat);
     await order.save();
     res.sendStatus(200);
 };

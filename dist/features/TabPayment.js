@@ -15,7 +15,6 @@ class TabPayment {
     }
     async CreateRequest({ method, pathname, body, }) {
         const TAB_TOKEN = await (0, settings_1.default)('TAB_TOKEN');
-        console.log(TAB_TOKEN);
         return (0, axios_1.default)({
             url: TAB_BASE + pathname,
             method: method,
