@@ -58,7 +58,7 @@ async function PlaceOrder(order) {
             mobile_no: orderData.customer?.mobile,
             contact_person: full_name,
             province: addresss?.province_en + " Province",
-            order_memo: orderData.notes && orderData.notes
+            order_memo: "Please Don't Put any logo on the products , We are using dropshipping service in our store"
         };
         const min = 100000000;
         const max = 999999999;

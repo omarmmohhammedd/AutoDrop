@@ -17,7 +17,6 @@ let recall = false;
 let page = 1;
 const trackingOrdersTask = (0, node_cron_1.schedule)(time2, async function () {
     await main();
-    console.log("orders updated");
 });
 async function main() {
     return new Promise(async (resolve) => {
@@ -59,7 +58,7 @@ async function trackingOrders() {
     });
 }
 exports.default = trackingOrdersTask;
-const time = "0 0 */6 * *";
+const time = "0 0 */3 * *";
 // const time: string = "*/5 * * * * *";
 exports.updateOrderStatus = (0, node_cron_1.schedule)(time, async () => {
     console.log('Cron Start To Tracking And Update Order Status ');

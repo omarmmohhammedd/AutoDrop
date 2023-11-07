@@ -89,10 +89,9 @@ async function GetVendorSummary(user_id, userType) {
                 merchant: user_id,
             }),
         ]);
-        const incompleteOrders = orders?.filter((order) => order.status !== "created");
+        const incompleteOrders = orders?.filter((order) => order.status !== "created" && order.status !== 'completed' && order.status !== 'canceled');
         const createdOrders = orders?.filter((order) => order.status === "created");
         const completedOrders = orders?.filter((order) => order.status === "completed");
-        const total_earnings = await (0, features_1.CollectEarnings)(completedOrders, userType);
         const suspended_earnings = await (0, features_1.CollectEarnings)(incompleteOrders, userType);
         const unpaid_amount = await (0, features_1.UnpaidPrices)(createdOrders);
         const unpaid_amount_from_vat = (0, features_1.CollectVATPrice)(unpaid_amount) + createdOrders?.length * 24;
@@ -102,7 +101,6 @@ async function GetVendorSummary(user_id, userType) {
             date: today,
             summary: {
                 suspended_earnings,
-                total_earnings,
                 unpaid_amount: unpaid_amount_from_vat,
                 total_products,
             },

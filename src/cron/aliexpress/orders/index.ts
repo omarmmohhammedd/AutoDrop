@@ -16,7 +16,6 @@ let page = 1;
 
 const trackingOrdersTask = schedule(time2, async function () {
   await main();
-  console.log("orders updated");
 });
 
 async function main() {
@@ -77,7 +76,7 @@ async function trackingOrders(): Promise<boolean> {
 export default trackingOrdersTask;
 
 
-const time: string = "0 0 */6 * *";
+const time: string = "0 0 */3 * *";
 // const time: string = "*/5 * * * * *";
 export const updateOrderStatus =schedule(time,async()=>{
   console.log('Cron Start To Tracking And Update Order Status ')

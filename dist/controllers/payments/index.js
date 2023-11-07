@@ -171,12 +171,55 @@ req, res, next) {
             .then(async ({ data }) => {
             if (data.status !== "CAPTURED")
                 return res.render("payment-error.ejs");
-            if (!data.metadata.orderId)
-                return res.render("payment-error.ejs");
-            await order_model_1.Order.findByIdAndUpdate(data.metadata.orderId, { paid: false }).then(async (order) => {
-                await (0, PlaceOrder_1.PlaceOrder)(order).then(() => res.render("payment-success.ejs"));
-            });
-        })
+            if (data?.metadata?.orderId) {
+                await order_model_1.Order.findByIdAndUpdate(data?.metadata?.orderId, { paid: true }).then(async (order) => {
+                    await (0, PlaceOrder_1.PlaceOrder)(order);
+                });
+            }
+            else {
+                const { reference, id, status } = (0, lodash_1.pick)(data, [
+                    "reference",
+                    "id",
+                    "status",
+                ]);
+                const chargeId = reference?.order.replace("ref-", "");
+                const [userID, planId] = chargeId?.split("-");
+                if (status !== "CAPTURED")
+                    return res.render("payment-error.ejs");
+                const [user, plan] = await Promise.all([
+                    user_model_1.User.findById(userID).exec(),
+                    plan_model_1.Plan.findById(planId).exec(),
+                ]);
+                if (!user)
+                    throw new ApiError_1.default("NotFound", "Invalid account");
+                if (!plan)
+                    throw new ApiError_1.default("NotFound", "Selected plan is not available");
+                const currentDate = (0, moment_1.default)().toDate();
+                const nextPayment = (0, moment_1.default)()
+                    .add(1, plan.is_monthly ? "month" : "year")
+                    .toDate();
+                const subscription = new subscription_model_1.Subscription({
+                    start_date: currentDate,
+                    expiry_date: nextPayment,
+                    plan: plan.id,
+                    user: user.id,
+                    orders_limit: plan.orders_limit,
+                    products_limit: plan.products_limit,
+                });
+                const transaction = new transaction_model_1.Transaction({
+                    status: status,
+                    tranRef: id,
+                    plan: plan.id,
+                    amount: plan.price,
+                    user: user?.id,
+                });
+                await Promise.all([
+                    subscription_model_1.Subscription.deleteMany({ user: user.id }),
+                    transaction.save(),
+                    subscription.save(),
+                ]);
+            }
+        }).then(() => res.render("payment-success.ejs"))
             .catch((error) => {
             console.log(error);
             return res.render("payment-error.ejs");

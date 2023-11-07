@@ -184,7 +184,7 @@ export async function CreatePaymentToSubscribe(
     const location = GenerateLocation(req);
     const route = "/v1/payments/callback/pay-order";
 
-    const { id, notes } = pick(req.body, ["id", "notes"]);
+    const { id } = pick(req.body, ["id"]);
     const { user_id } = pick(req.local, ["user_id", "userType"]);
 
     const [user, order] = await Promise.all([
@@ -218,10 +218,8 @@ export async function CreatePaymentToSubscribe(
 
     if(orderJSON.paid) throw new ApiError("409",'This Order Has Been Paid Before ')
     const generateId = [user.id, order.id].join("-");
-      await Order.findByIdAndUpdate(id,{$set:{'notes':notes}})
     const unpaidAmount = await UnpaidPrices([order]);
     const orderAmountWithVat =order.shippingFee ? CollectVATPrice(unpaidAmount)  + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) /100))) : CollectVATPrice(unpaidAmount)
-    console.log(orderAmountWithVat)
     const vatAmount = parseFloat(
       (orderAmountWithVat - unpaidAmount).toFixed(2)
     );
@@ -281,7 +279,7 @@ export async function CreatePaymentToSubscribe(
       post: location + route,
       redirect: location + route,
       ref_order: "ref-" + generateId,
-      description: notes,
+      description: "Please Don't Put any logo on the products , We are using dropshipping service in our store.",
       source: undefined,
       amount: 0,
     })

@@ -100,7 +100,7 @@ async function GetVendorSummary(user_id: string, userType: string) {
     );
 
     const incompleteOrders: OrderDocument[] = orders?.filter(
-      (order: OrderDocument) => order.status !== "created"
+      (order: OrderDocument) => order.status !== "created" && order.status !=='completed' && order.status !== 'canceled'
     );
 
     const createdOrders: OrderDocument[] = orders?.filter(
@@ -111,7 +111,6 @@ async function GetVendorSummary(user_id: string, userType: string) {
       (order: OrderDocument) => order.status === "completed"
     );
 
-    const total_earnings = await CollectEarnings(completedOrders, userType);
     const suspended_earnings = await CollectEarnings(
       incompleteOrders,
       userType
@@ -126,7 +125,6 @@ async function GetVendorSummary(user_id: string, userType: string) {
       date: today,
       summary: {
         suspended_earnings,
-        total_earnings,
         unpaid_amount: unpaid_amount_from_vat,
         total_products,
       },
