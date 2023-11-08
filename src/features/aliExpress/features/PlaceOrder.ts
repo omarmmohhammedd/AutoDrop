@@ -38,7 +38,8 @@ export async function PlaceOrder(order: OrderDocument) {
               product_id: Number(product.original_product_id),
               product_count: item?.quantity,
               logistics_service_name:item?.product?.shipping?.serviceName,
-              sku_attr:`${skuValue?.flat()[0]?.id}`
+              sku_attr:`${skuValue?.flat()[0]?.id}`,
+              order_memo:"Please Don't Put any logo on the products , We are using dropshipping service in our store"
             };
           }
          
@@ -59,8 +60,7 @@ export async function PlaceOrder(order: OrderDocument) {
       "is_foreigner": "false", 
       mobile_no:orderData.customer?.mobile,
       contact_person:full_name,
-      province:addresss?.province_en + " Province",
-      order_memo:"Please Don't Put any logo on the products , We are using dropshipping service in our store"
+      province:addresss?.province_en + " Province"
     };
 
     const min = 100000000; 
