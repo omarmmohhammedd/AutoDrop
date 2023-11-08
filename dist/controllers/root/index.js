@@ -147,7 +147,7 @@ async function GetAdminSummary() {
                 available_subscriptions,
                 expired_subscriptions,
                 secure_vendors,
-                total_transactions: parseFloat(total_transactions.toFixed(2)),
+                total_transactions: Math.round(total_transactions),
                 total_products,
             },
         };
