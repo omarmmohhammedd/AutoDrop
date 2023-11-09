@@ -29,11 +29,11 @@ export async function PlaceOrder(order: OrderDocument) {
            aliProduct?.aliexpress_ds_product_get_response?.result?.ae_item_sku_info_dtos?.ae_item_sku_info_d_t_o.map((option:any)=>{
               option.ae_sku_property_dtos.ae_sku_property_d_t_o.filter((value)=>{
               if(value.sku_property_id ==sku_property_id  && property_value_id == value.property_value_id) {
-                return skuValue.push(option)
+                skuValue.push(option)
               }
             })
           })
-          if(skuValue?.flat()[0]?.id){
+          if(skuValue[0]?.id){
             return {
               product_id: Number(product.original_product_id),
               product_count: item?.quantity,
@@ -44,7 +44,7 @@ export async function PlaceOrder(order: OrderDocument) {
           }
          
         })
-        .filter((e) => e)
+        .filter((e:any) => e)
     );
 
     const full_name = `${orderData?.customer?.first_name} ${orderData?.customer?.middle_name} ${orderData?.customer?.last_name} `
@@ -71,12 +71,12 @@ export async function PlaceOrder(order: OrderDocument) {
       logistics_address,
       out_order_id:randomNumber
      });
-    const method = "aliexpress.trade.buy.placeorder";
-    const option = {
-      method,
-      param_place_order_request4_open_api_d_t_o:data,
-      sign_method: "sha256",
-    };
+     const method = "aliexpress.trade.buy.placeorder";
+     const option = {
+       method,
+       param_place_order_request4_open_api_d_t_o:data,
+       sign_method: "sha256",
+      };
     MakeRequest(option).then(async({ data }) => {
       const error = data.error_response;
       if (error)

@@ -30,11 +30,11 @@ async function PlaceOrder(order) {
             aliProduct?.aliexpress_ds_product_get_response?.result?.ae_item_sku_info_dtos?.ae_item_sku_info_d_t_o.map((option) => {
                 option.ae_sku_property_dtos.ae_sku_property_d_t_o.filter((value) => {
                     if (value.sku_property_id == sku_property_id && property_value_id == value.property_value_id) {
-                        return skuValue.push(option);
+                        skuValue.push(option);
                     }
                 });
             });
-            if (skuValue?.flat()[0]?.id) {
+            if (skuValue[0]?.id) {
                 return {
                     product_id: Number(product.original_product_id),
                     product_count: item?.quantity,

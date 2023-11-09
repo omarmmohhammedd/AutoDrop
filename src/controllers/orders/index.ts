@@ -76,7 +76,6 @@ export async function GetSelectedOrder(
 
     const unpaidAmount = await UnpaidPrices([order]);
     const amountWithVat = CollectVATPrice(unpaidAmount);
-    console.log(amountWithVat + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) /100))))
     res.json({
       order,
       unpaid_amount: unpaidAmount,
@@ -433,9 +432,6 @@ export const updateShipping = async (req: Request, res: Response, next: NextFunc
   order.shippingFee = totalShippingAmount;
   let orderShipVat = totalShippingAmount * (order.vat_value /100)
   order.amount_included_vat +=orderShipVat
-  console.log(order.vat_value)
-  console.log(orderShipVat)
-  console.log(order.amount_included_vat)
   await order.save();
 
 

@@ -48,7 +48,6 @@ async function GetSelectedOrder(req, res, next) {
             throw new ApiError_1.default("NotFound", "Selected order is invalid");
         const unpaidAmount = await (0, features_1.UnpaidPrices)([order]);
         const amountWithVat = (0, features_1.CollectVATPrice)(unpaidAmount);
-        console.log(amountWithVat + ((Number(order.shippingFee) * (Number(TAB_ORDERS_TAX || 0) / 100))));
         res.json({
             order,
             unpaid_amount: unpaidAmount,
@@ -332,9 +331,6 @@ const updateShipping = async (req, res, next) => {
     order.shippingFee = totalShippingAmount;
     let orderShipVat = totalShippingAmount * (order.vat_value / 100);
     order.amount_included_vat += orderShipVat;
-    console.log(order.vat_value);
-    console.log(orderShipVat);
-    console.log(order.amount_included_vat);
     await order.save();
     res.sendStatus(200);
 };
