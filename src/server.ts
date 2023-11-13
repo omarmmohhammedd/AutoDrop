@@ -105,7 +105,7 @@ app.use(ErrorHandler);
   console.log("database connection starting..");
   connection().then(async () => {
     task.start();
-    deletionTask.start();
+    // deletionTask.start();
     initializeTask.start();
     updateOrderStatus.start()
     server.listen(PORT || 3000, async() => {

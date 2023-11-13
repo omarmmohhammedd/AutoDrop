@@ -19,7 +19,6 @@ const path_1 = __importDefault(require("path"));
 const aliexpress_1 = __importDefault(require("./cron/aliexpress"));
 const session_1 = require("./features/global/session");
 const socket_io_1 = require("./features/global/socket.io");
-const temporaryDeletion_1 = __importDefault(require("./cron/temporaryDeletion"));
 const settings_1 = __importDefault(require("./features/settings"));
 const initialize_1 = __importDefault(require("./cron/aliexpress/initialize"));
 const orders_1 = require("./cron/aliexpress/orders");
@@ -81,7 +80,7 @@ app.use(ErrorHandler_1.ErrorHandler);
     console.log("database connection starting..");
     (0, db_1.connection)().then(async () => {
         aliexpress_1.default.start();
-        temporaryDeletion_1.default.start();
+        // deletionTask.start();
         initialize_1.default.start();
         orders_1.updateOrderStatus.start();
         server.listen(PORT || 3000, async () => {
