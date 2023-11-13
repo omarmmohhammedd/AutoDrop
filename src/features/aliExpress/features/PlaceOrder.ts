@@ -82,6 +82,7 @@ export async function PlaceOrder(order: OrderDocument) {
       if (error)
         return reject(new ApiError("UnprocessableEntity", error.msg));
       const result = data?.aliexpress_trade_buy_placeorder_response?.result?.order_list;
+      console.log(data)
       if(result.number[0]){
         await Order.findByIdAndUpdate(order.id,{$set:{'tracking_order_id' : result.number[0] , 'paid':true,status:'in_review'}},{new:true}).then((e)=>{
           return resolve(result);

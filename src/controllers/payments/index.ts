@@ -62,7 +62,7 @@ export async function CheckSubscriptionResult(
       orders_limit: plan.orders_limit,
       products_limit: plan.products_limit,
     });
-
+    console.log(subscription)
     const transaction = new Transaction({
       status: status,
       tranRef: id,
@@ -205,6 +205,52 @@ export async function GetChargeDetails(
             await Order.findByIdAndUpdate(data?.metadata?.orderId,{paid:true}).then(async(order)=> {
               await PlaceOrder(order)
             })
+          }else {
+            const { reference, id, status } = pick(data, [
+              "reference",
+              "id",
+              "status",
+            ]);
+            const chargeId = reference?.order.replace("ref-", "");
+            const [userID, planId] = chargeId?.split("-");
+        
+            if (status !== "CAPTURED") return res.render("payment-error.ejs");
+        
+            const [user, plan] = await Promise.all([
+              User.findById(userID).exec(),
+              Plan.findById(planId).exec(),
+            ]);
+        
+            if (!user) throw new ApiError("NotFound", "Invalid account");
+            if (!plan) throw new ApiError("NotFound", "Selected plan is not available");
+        
+            const currentDate = moment().toDate();
+            const nextPayment = moment()
+              .add(1, plan.is_monthly ? "month" : "year")
+              .toDate();
+        
+            const subscription = new Subscription({
+              start_date: currentDate,
+              expiry_date: nextPayment,
+              plan: plan.id,
+              user: user.id,
+              orders_limit: plan.orders_limit,
+              products_limit: plan.products_limit,
+            });
+            console.log(subscription)
+            const transaction = new Transaction({
+              status: status,
+              tranRef: id,
+              plan: plan.id,
+              amount: plan.price,
+              user: user?.id,
+            });
+        
+            await Promise.all([
+              Subscription.deleteMany({ user: user.id }),
+              transaction.save(),
+              subscription.save(),
+            ]);
           }
       }).then(()=>res.render("payment-success.ejs"))
       .catch((error) => {

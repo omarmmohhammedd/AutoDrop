@@ -213,7 +213,7 @@ export async function CreatePaymentToSubscribe(
       ) throw new ApiError("409",'Complete Shipping Address First')
 
     const shippingFee = orderJSON.shippingFee
-    if(!shippingFee) throw new ApiError("409",'Complete Products Shipping First')
+    if(shippingFee ===null) throw new ApiError("409",'Complete Products Shipping First')
 
     if(orderJSON.paid) throw new ApiError("409",'This Order Has Been Paid Before ')
     const generateId = [user.id, order.id].join("-");

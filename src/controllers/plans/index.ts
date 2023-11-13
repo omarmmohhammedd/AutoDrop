@@ -407,7 +407,7 @@ export async function DeletePlan(
 function GenerateChargePayment(req: Request, id: string, user_id: string) {
   return new Promise(async (resolve, reject) => {
     const location = GenerateLocation(req);
-    const route = "/v1/payments/callback/subscriptions";
+    const route = "/v1/payments/callback/pay-order";
 
     const [user, plan] = await Promise.all([
       User.findById(user_id).exec(),
