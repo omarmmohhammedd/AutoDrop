@@ -143,7 +143,7 @@ async function CreatePaymentToSubscribe(req, res, next) {
             !orderJSON.shipping.address.district_en)
             throw new ApiError_1.default("409", 'Complete Shipping Address First');
         const shippingFee = orderJSON.shippingFee;
-        if (!shippingFee)
+        if (shippingFee === null)
             throw new ApiError_1.default("409", 'Complete Products Shipping First');
         if (orderJSON.paid)
             throw new ApiError_1.default("409", 'This Order Has Been Paid Before ');
