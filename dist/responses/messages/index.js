@@ -9,7 +9,7 @@ exports.messages = {
         <p>Email address: {{_EMAIL_}}</p>
         <p>Password: {{_PASSWORD_}}</p>
         <p>Click on next button to redirect to our panel to quick login</p>
-        <a href="https://dropshopping-client.vercel.app/account/login" style="display:block;width:100%;padding:15px 20px;border-radius:10px;background-color:#111111;color:#ffffff;text-align:center;font-weight:500;width:100%">QUICK LOGIN</a>
+        <a href="https://autodrop.me/account/login" style="display:block;width:100%;padding:15px 20px;border-radius:10px;background-color:#111111;color:#ffffff;text-align:center;font-weight:500;width:100%">QUICK LOGIN</a>
         <p>Note that the above password has nothing to do with the password associated with the Basket platform, you can also change it at any time you want from within the panel</p>
       </div>
     `,
@@ -23,7 +23,7 @@ exports.messages = {
         <h3>Welcome dear: {{_NAME_}}.<h3>
         <p>This e-mail was sent to inform you that your account will be deleted through our platform based on the action that was done by you via your account a while ago, so we would like to inform you that the account and everything related to it will be deleted after 7 days, knowing that you can return Only within that period if you want to reactivate the account, after that you cannot register with that account again. You can create another account through the platform after uninstalling the application and then reinstalling to create a new account.</p>
         <p>Click on next button to redirect to our panel to quick login if you want to reactivate the account.</p>
-        <a href="https://dropshopping-client.vercel.app/account/login" style="display:block;width:100%;padding:15px 20px;border-radius:10px;background-color:#111111;color:#ffffff;text-align:center;font-weight:500;width:100%">REACTIVATE NOW !!</a>
+        <a href="https://autodrop.me/account/login" style="display:block;width:100%;padding:15px 20px;border-radius:10px;background-color:#111111;color:#ffffff;text-align:center;font-weight:500;width:100%">REACTIVATE NOW !!</a>
        
       </div>`,
     "contact-message": `<div style="max-width:680px;margin:auto;width:100%;">

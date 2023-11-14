@@ -173,10 +173,14 @@ async function GetAdminSummary() {
       Product.countDocuments(),
     ]);
 
-    await Promise.all(
+    transactions.length && await Promise.all(
+  
       transactions.map((e) => {
         const item = e.toJSON();
-        total_transactions += Number(item.plan.price) || 0;
+        if (item.plan){
+          total_transactions += Number(item.plan.price) || 0;
+        }
+       
       })
     );
 

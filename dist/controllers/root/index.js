@@ -136,9 +136,11 @@ async function GetAdminSummary() {
             }).select("name images price main_price items"),
             product_model_1.Product.countDocuments(),
         ]);
-        await Promise.all(transactions.map((e) => {
+        transactions.length && await Promise.all(transactions.map((e) => {
             const item = e.toJSON();
-            total_transactions += Number(item.plan.price) || 0;
+            if (item.plan) {
+                total_transactions += Number(item.plan.price) || 0;
+            }
         }));
         result = {
             products,
